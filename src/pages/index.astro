@@ -5,7 +5,7 @@ import GithubLogo from "../components/GithubLogo.astro";
 import Houston from "../components/Houston.astro";
 import HoustonAI from "../components/HoustonAI.astro";
 import Notice from "../components/Notice.astro";
-import Generator from "../components/Generator.astro";
+import Generator from "../components/Generator.tsx";
 import { model } from "../utils/generate";
 import "../global.css";
 import "katex/dist/katex.min.css";
@@ -30,7 +30,7 @@ const meta: Meta = {
     <AstroLogo />
     <GithubLogo />
     <header class="container">
-      <Houston glow />
+      <Houston glow/>
       <div class="intro">
         <div class="intro-content">
           <p class="intro-title">
@@ -48,7 +48,7 @@ const meta: Meta = {
     <div class="container z-index-100">
       <Notice />
     </div>
-    <Generator />
+    <Generator client:load />
     <style>
       @import "../global.css";
     </style>

@@ -30,6 +30,8 @@ const apiEndpoint = (import.meta.env.OPENAI_API_ENDPOINT || "https://api.openai.
 export const POST: APIRoute = async (context) => {
   try {
     const body = await context.request.json();
+    console.log("Received request with body:", body);
+    
     const { messages, temperature, sessionId } = body;
     if (!messages) {
       return new Response(

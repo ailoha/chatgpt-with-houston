@@ -1,0 +1,31 @@
+.footer {
+  margin: 1rem auto;
+  border: 1px solid #eb3fd9;
+  background: linear-gradient(45deg,#58242e 0%,#5f2965 100%);
+  position: relative;
+  grid-column: 1 / -1;
+  margin-top: 0;
+  font-size: 1rem;
+  display: flex;
+  flex-flow: column;
+  gap: 0.33em;
+  padding: 0.8rem;
+  font-family: "MD IO 0.5", system-ui, -apple-system, BlinkMacSystemFont;
+}
+.links {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  gap: 12px;
+}
+p {
+  color: #ddd;
+  margin: 0;
+  margin-bottom: 1rem;
+}
+a {
+  color: #ddd;
+}
+a:is(:hover, :focus) {
+  color: white;
+}
