@@ -14,23 +14,23 @@ interface ProviderConfig {
 export function getProviderConfig(provider: Provider): ProviderConfig {
   switch (provider) {
     case "openai":
+      const openaiBase = (
+        process.env.OPENAI_API_BASE_URL || "https://api.openai.com/v1"
+      ).trim().replace(/\/$/, "");
       return {
         apiKey: process.env.OPENAI_API_KEY || "",
         model: process.env.OPENAI_API_MODEL || "gpt-5.4-mini",
-        endpoint: (
-          process.env.OPENAI_API_BASE_URL ||
-          "https://api.openai.com/v1/chat/completions"
-        ).trim().replace(/\/$/, ""),
+        endpoint: `${openaiBase}/chat/completions`,
         label: "OpenAI",
       };
     case "claude":
+      const claudeBase = (
+        process.env.CLAUDE_API_BASE_URL || "https://api.anthropic.com/v1"
+      ).trim().replace(/\/$/, "");
       return {
         apiKey: process.env.CLAUDE_API_KEY || "",
         model: process.env.CLAUDE_API_MODEL || "claude-haiku-4-5",
-        endpoint: (
-          process.env.CLAUDE_API_BASE_URL ||
-          "https://api.anthropic.com/v1/messages"
-        ).trim().replace(/\/$/, ""),
+        endpoint: `${claudeBase}/messages`,
         label: "Claude",
       };
     case "gemini":
