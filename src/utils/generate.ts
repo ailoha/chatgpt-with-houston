@@ -14,27 +14,33 @@ interface ProviderConfig {
 export function getProviderConfig(provider: Provider): ProviderConfig {
   switch (provider) {
     case "openai":
+      const openaiBase = (
+        process.env.OPENAI_API_BASE_URL || "https://api.openai.com/v1"
+      ).trim().replace(/\/$/, "");
       return {
         apiKey: process.env.OPENAI_API_KEY || "",
         model: process.env.OPENAI_API_MODEL || "gpt-5.4-mini",
-        endpoint: (
-          process.env.OPENAI_API_ENDPOINT ||
-          "https://api.openai.com/v1/chat/completions"
-        ).trim().replace(/\/$/, ""),
+        endpoint: `${openaiBase}/chat/completions`,
         label: "OpenAI",
       };
     case "claude":
+      const claudeBase = (
+        process.env.CLAUDE_API_BASE_URL || "https://api.anthropic.com/v1"
+      ).trim().replace(/\/$/, "");
       return {
         apiKey: process.env.CLAUDE_API_KEY || "",
         model: process.env.CLAUDE_API_MODEL || "claude-haiku-4-5",
-        endpoint: "https://api.anthropic.com/v1/messages",
+        endpoint: `${claudeBase}/messages`,
         label: "Claude",
       };
     case "gemini":
       return {
         apiKey: process.env.GEMINI_API_KEY || "",
         model: process.env.GEMINI_API_MODEL || "gemini-3-flash-preview",
-        endpoint: "https://generativelanguage.googleapis.com/v1beta",
+        endpoint: (
+          process.env.GEMINI_API_BASE_URL ||
+          "https://generativelanguage.googleapis.com/v1beta"
+        ).trim().replace(/\/$/, ""),
         label: "Gemini",
       };
   }
@@ -42,13 +48,12 @@ export function getProviderConfig(provider: Provider): ProviderConfig {
 
 const ALL_PROVIDERS: Provider[] = ["openai", "claude", "gemini"];
 
-export function getAvailableProviders(): { id: Provider; label: string; model: string }[] {
-  return ALL_PROVIDERS
-    .map((p) => {
-      const cfg = getProviderConfig(p);
-      return cfg.apiKey ? { id: p, label: cfg.label, model: cfg.model } : null;
-    })
-    .filter((x): x is NonNullable<typeof x> => x !== null);
+export function getActiveProvider(): { id: Provider; label: string; model: string } | null {
+  for (const p of ALL_PROVIDERS) {
+    const cfg = getProviderConfig(p);
+    if (cfg.apiKey) return { id: p, label: cfg.label, model: cfg.model };
+  }
+  return null;
 }
 
 // --- Payload generation per provider ---
