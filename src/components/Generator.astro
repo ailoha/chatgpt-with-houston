@@ -4,10 +4,10 @@ import StopIcon from "./icons/Stop.astro";
 ---
 
 <footer class="container">
-  <div class="provider-selector" id="providerSelector">
-    <button class="provider-btn active" data-provider="openai">OpenAI</button>
-    <button class="provider-btn" data-provider="claude">Claude</button>
-    <button class="provider-btn" data-provider="gemini">Gemini</button>
+  <div class="provider-selector" id="providerSelector" style="display:none;">
+    <button class="provider-btn" data-provider="openai" style="display:none;">OpenAI</button>
+    <button class="provider-btn" data-provider="claude" style="display:none;">Claude</button>
+    <button class="provider-btn" data-provider="gemini" style="display:none;">Gemini</button>
   </div>
   <form action="#" id="messageForm">
     <div class="autogrow">
@@ -110,9 +110,14 @@ import StopIcon from "./icons/Stop.astro";
         }
       }
 
+      // Only show selector if more than one provider is available
+      if (availableProviders.length > 1) {
+        providerSelector.style.display = "";
+      }
+
       updateProviderUI();
     } catch {
-      // If loading fails, show all buttons as fallback
+      // If loading fails, keep selector hidden
     }
   }
 
