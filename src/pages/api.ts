@@ -1,7 +1,7 @@
 import {
   generatePayload,
   parseStream,
-  providerConfigs,
+  getProviderConfig,
   getAvailableProviders,
 } from "../utils/generate";
 import type { APIRoute } from "astro";
@@ -10,12 +10,7 @@ import type { Provider } from "../types";
 export const prerender = false;
 
 export const GET: APIRoute = async () => {
-  const available = getAvailableProviders();
-  const providers = available.map((p) => ({
-    id: p,
-    label: providerConfigs[p].label,
-    model: providerConfigs[p].model,
-  }));
+  const providers = getAvailableProviders();
   return new Response(JSON.stringify({ providers }), {
     headers: { "Content-Type": "application/json" },
   });
@@ -38,7 +33,7 @@ export const POST: APIRoute = async (context) => {
         ? rawProvider
         : "openai";
 
-    const cfg = providerConfigs[provider];
+    const cfg = getProviderConfig(provider);
     if (!cfg.apiKey) {
       return new Response(
         JSON.stringify({

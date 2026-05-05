@@ -2,37 +2,53 @@ import { createParser } from "eventsource-parser";
 import type { ParsedEvent, ReconnectInterval } from "eventsource-parser";
 import type { ChatMessage, Provider } from "../types";
 
-// --- Provider configs from environment ---
+// --- Provider configs from environment (read at runtime via process.env) ---
 
-export const providerConfigs = {
-  openai: {
-    apiKey: import.meta.env.OPENAI_API_KEY || "",
-    model: import.meta.env.OPENAI_API_MODEL || "gpt-5.4-mini",
-    endpoint: (
-      import.meta.env.OPENAI_API_ENDPOINT ||
-      "https://api.openai.com/v1/chat/completions"
-    ).trim().replace(/\/$/, ""),
-    label: "OpenAI",
-  },
-  claude: {
-    apiKey: import.meta.env.CLAUDE_API_KEY || "",
-    model: import.meta.env.CLAUDE_API_MODEL || "claude-haiku-4-5",
-    endpoint: "https://api.anthropic.com/v1/messages",
-    label: "Claude",
-  },
-  gemini: {
-    apiKey: import.meta.env.GEMINI_API_KEY || "",
-    model: import.meta.env.GEMINI_API_MODEL || "gemini-3-flash-preview",
-    endpoint: "https://generativelanguage.googleapis.com/v1beta",
-    label: "Gemini",
-  },
-};
+interface ProviderConfig {
+  apiKey: string;
+  model: string;
+  endpoint: string;
+  label: string;
+}
 
-// Which providers have API keys configured
-export function getAvailableProviders(): Provider[] {
-  return (Object.keys(providerConfigs) as Provider[]).filter(
-    (p) => !!providerConfigs[p].apiKey
-  );
+export function getProviderConfig(provider: Provider): ProviderConfig {
+  switch (provider) {
+    case "openai":
+      return {
+        apiKey: process.env.OPENAI_API_KEY || "",
+        model: process.env.OPENAI_API_MODEL || "gpt-5.4-mini",
+        endpoint: (
+          process.env.OPENAI_API_ENDPOINT ||
+          "https://api.openai.com/v1/chat/completions"
+        ).trim().replace(/\/$/, ""),
+        label: "OpenAI",
+      };
+    case "claude":
+      return {
+        apiKey: process.env.CLAUDE_API_KEY || "",
+        model: process.env.CLAUDE_API_MODEL || "claude-haiku-4-5",
+        endpoint: "https://api.anthropic.com/v1/messages",
+        label: "Claude",
+      };
+    case "gemini":
+      return {
+        apiKey: process.env.GEMINI_API_KEY || "",
+        model: process.env.GEMINI_API_MODEL || "gemini-3-flash-preview",
+        endpoint: "https://generativelanguage.googleapis.com/v1beta",
+        label: "Gemini",
+      };
+  }
+}
+
+const ALL_PROVIDERS: Provider[] = ["openai", "claude", "gemini"];
+
+export function getAvailableProviders(): { id: Provider; label: string; model: string }[] {
+  return ALL_PROVIDERS
+    .map((p) => {
+      const cfg = getProviderConfig(p);
+      return cfg.apiKey ? { id: p, label: cfg.label, model: cfg.model } : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
 }
 
 // --- Payload generation per provider ---
@@ -51,7 +67,7 @@ function generateOpenAIPayload(
   messages: ChatMessage[],
   temperature: number
 ): { url: string; init: RequestInit } {
-  const cfg = providerConfigs.openai;
+  const cfg = getProviderConfig("openai");
   return {
     url: cfg.endpoint,
     init: {
@@ -74,7 +90,7 @@ function generateClaudePayload(
   messages: ChatMessage[],
   temperature: number
 ): { url: string; init: RequestInit } {
-  const cfg = providerConfigs.claude;
+  const cfg = getProviderConfig("claude");
   const { system, userMessages } = extractSystemMessage(messages);
 
   // Claude requires alternating user/assistant. Merge consecutive same-role.
@@ -117,7 +133,7 @@ function generateGeminiPayload(
   messages: ChatMessage[],
   temperature: number
 ): { url: string; init: RequestInit } {
-  const cfg = providerConfigs.gemini;
+  const cfg = getProviderConfig("gemini");
   const { system, userMessages } = extractSystemMessage(messages);
 
   const contents = userMessages.map((msg) => ({
