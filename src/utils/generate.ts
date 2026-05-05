@@ -42,13 +42,12 @@ export function getProviderConfig(provider: Provider): ProviderConfig {
 
 const ALL_PROVIDERS: Provider[] = ["openai", "claude", "gemini"];
 
-export function getAvailableProviders(): { id: Provider; label: string; model: string }[] {
-  return ALL_PROVIDERS
-    .map((p) => {
-      const cfg = getProviderConfig(p);
-      return cfg.apiKey ? { id: p, label: cfg.label, model: cfg.model } : null;
-    })
-    .filter((x): x is NonNullable<typeof x> => x !== null);
+export function getActiveProvider(): { id: Provider; label: string; model: string } | null {
+  for (const p of ALL_PROVIDERS) {
+    const cfg = getProviderConfig(p);
+    if (cfg.apiKey) return { id: p, label: cfg.label, model: cfg.model };
+  }
+  return null;
 }
 
 // --- Payload generation per provider ---
