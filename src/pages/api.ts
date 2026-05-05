@@ -2,16 +2,15 @@ import {
   generatePayload,
   parseStream,
   getProviderConfig,
-  getAvailableProviders,
+  getActiveProvider,
 } from "../utils/generate";
 import type { APIRoute } from "astro";
-import type { Provider } from "../types";
 
 export const prerender = false;
 
 export const GET: APIRoute = async () => {
-  const providers = getAvailableProviders();
-  return new Response(JSON.stringify({ providers }), {
+  const provider = getActiveProvider();
+  return new Response(JSON.stringify({ provider }), {
     headers: { "Content-Type": "application/json" },
   });
 };
@@ -19,7 +18,7 @@ export const GET: APIRoute = async () => {
 export const POST: APIRoute = async (context) => {
   try {
     const body = await context.request.json();
-    const { messages, temperature, provider: rawProvider } = body;
+    const { messages, temperature } = body;
 
     if (!messages) {
       return new Response(
@@ -28,24 +27,21 @@ export const POST: APIRoute = async (context) => {
       );
     }
 
-    const provider: Provider =
-      rawProvider === "claude" || rawProvider === "gemini"
-        ? rawProvider
-        : "openai";
-
-    const cfg = getProviderConfig(provider);
-    if (!cfg.apiKey) {
+    const active = getActiveProvider();
+    if (!active) {
       return new Response(
         JSON.stringify({
           error: {
             code: "NoApiKey",
-            message: `API key for ${cfg.label} is not configured.`,
+            message: "No AI provider is configured.",
           },
         }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
+    const provider = active.id;
+    const cfg = getProviderConfig(provider);
     const { url, init } = generatePayload(provider, messages, temperature);
 
     const controller = new AbortController();
