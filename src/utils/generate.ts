@@ -18,7 +18,7 @@ export function getProviderConfig(provider: Provider): ProviderConfig {
         apiKey: process.env.OPENAI_API_KEY || "",
         model: process.env.OPENAI_API_MODEL || "gpt-5.4-mini",
         endpoint: (
-          process.env.OPENAI_API_ENDPOINT ||
+          process.env.OPENAI_API_BASE_URL ||
           "https://api.openai.com/v1/chat/completions"
         ).trim().replace(/\/$/, ""),
         label: "OpenAI",
@@ -27,14 +27,20 @@ export function getProviderConfig(provider: Provider): ProviderConfig {
       return {
         apiKey: process.env.CLAUDE_API_KEY || "",
         model: process.env.CLAUDE_API_MODEL || "claude-haiku-4-5",
-        endpoint: "https://api.anthropic.com/v1/messages",
+        endpoint: (
+          process.env.CLAUDE_API_BASE_URL ||
+          "https://api.anthropic.com/v1/messages"
+        ).trim().replace(/\/$/, ""),
         label: "Claude",
       };
     case "gemini":
       return {
         apiKey: process.env.GEMINI_API_KEY || "",
         model: process.env.GEMINI_API_MODEL || "gemini-3-flash-preview",
-        endpoint: "https://generativelanguage.googleapis.com/v1beta",
+        endpoint: (
+          process.env.GEMINI_API_BASE_URL ||
+          "https://generativelanguage.googleapis.com/v1beta"
+        ).trim().replace(/\/$/, ""),
         label: "Gemini",
       };
   }
